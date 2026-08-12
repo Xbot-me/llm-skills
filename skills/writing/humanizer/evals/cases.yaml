@@ -4,7 +4,10 @@
     
     "The experiment produced interesting results. The agents generated 3 million lines of code. Some developers were impressed while others were skeptical. The implications remain unclear."
   rubric:
-    - The output does not use words like "delve", "tapestry", or "testament".
-    - The output does not overuse em dashes (—).
     - The output shows evidence of running the self-audit pass (step 6 and 7) by explicitly asking "What makes the below so obviously AI generated?".
     - The final text has a human tone with opinions or varied rhythm rather than a sterile voice.
+  assert_not_contains:
+    - "delve"
+    - "tapestry"
+    - "testament"
+    - "—"

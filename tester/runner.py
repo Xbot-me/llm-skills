@@ -11,6 +11,7 @@ import argparse
 import datetime as dt
 import json
 import sys
+import re
 from pathlib import Path
 
 import yaml
@@ -81,6 +82,22 @@ def run_case(
         }
 
     judgment = judge_response(judge, skill_text, rubric, response_text)
+    if not isinstance(judgment.get("checks"), list):
+        judgment["checks"] = []
+
+    for pat in case.get("assert_not_contains", []):
+        if re.search(pat, response_text, flags=re.IGNORECASE):
+            judgment["checks"].append({"item": f"Must not contain '{pat}'", "pass": False, "reason": "Found pattern in output."})
+            judgment["overall_pass"] = False
+        else:
+            judgment["checks"].append({"item": f"Must not contain '{pat}'", "pass": True, "reason": "Pattern not found."})
+
+    for pat in case.get("assert_contains", []):
+        if re.search(pat, response_text, flags=re.IGNORECASE):
+            judgment["checks"].append({"item": f"Must contain '{pat}'", "pass": True, "reason": "Found pattern in output."})
+        else:
+            judgment["checks"].append({"item": f"Must contain '{pat}'", "pass": False, "reason": "Pattern not found."})
+            judgment["overall_pass"] = False
 
     return {
         "skill": skill_name,
@@ -152,29 +169,64 @@ def main() -> None:
 
 
 def write_summary(results: list[dict], run_id: str) -> None:
+    summary_path = REPORTS_DIR / "summary-latest.md"
+    
+    prev_status = {}
+    if summary_path.exists():
+        for line in summary_path.read_text().splitlines():
+            if line.startswith("| ") and not line.startswith("| Skill"):
+                parts = [p.strip() for p in line.split("|")]
+                if len(parts) >= 5:
+                    _, skill, case, model, status, *_ = parts
+                    if "pass" in status:
+                        prev_status[(skill, case, model)] = "pass"
+                    elif "fail" in status:
+                        prev_status[(skill, case, model)] = "fail"
+                    elif "error" in status:
+                        prev_status[(skill, case, model)] = "error"
+                    elif "skip" in status:
+                        prev_status[(skill, case, model)] = "skipped"
+
     table = Table(title=f"Run {run_id}")
     table.add_column("Skill")
     table.add_column("Case")
     table.add_column("Model")
     table.add_column("Result")
+    table.add_column("Delta")
 
-    summary_lines = [f"# Eval run {run_id}\n", "| Skill | Case | Model | Result |", "|---|---|---|---|"]
+    summary_lines = [f"# Eval run {run_id}\n", "| Skill | Case | Model | Result | Delta |", "|---|---|---|---|---|"]
 
     for r in results:
         if r.get("skipped"):
             status = f"skipped ({r['reason']})"
+            clean_status = "skipped"
         elif r.get("error"):
             status = f"error: {r['error']}"
+            clean_status = "error"
         else:
             passed = r["judgment"].get("overall_pass")
             status = "✅ pass" if passed else "❌ fail"
+            clean_status = "pass" if passed else "fail"
+            
+        key = (r["skill"], r["case"], r["model"])
+        delta = "➖ unchanged"
+        if key not in prev_status:
+            delta = "🆕 new"
+        else:
+            p_stat = prev_status[key]
+            if p_stat == clean_status:
+                delta = "➖ unchanged"
+            elif p_stat == "fail" and clean_status == "pass":
+                delta = "✅ fixed"
+            elif p_stat == "pass" and clean_status == "fail":
+                delta = "❌ regressed"
+            else:
+                delta = "🔄 changed"
 
-        table.add_row(r["skill"], r["case"], r["model"], status)
-        summary_lines.append(f"| {r['skill']} | {r['case']} | {r['model']} | {status} |")
+        table.add_row(r["skill"], r["case"], r["model"], status, delta)
+        summary_lines.append(f"| {r['skill']} | {r['case']} | {r['model']} | {status} | {delta} |")
 
     console.print(table)
-
-    summary_path = REPORTS_DIR / "summary-latest.md"
     summary_path.write_text("\n".join(summary_lines) + "\n")
     console.print(f"\nFull transcripts in [cyan]reports/*/{run_id}/[/cyan], summary in [cyan]{summary_path}[/cyan]")
 
