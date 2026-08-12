@@ -61,23 +61,53 @@ def run_case(
     case_id = case["id"]
     prompt = case["prompt"]
     rubric = case["rubric"]
+    mode = case.get("mode", "text-only")
 
     if not key_available(model.provider):
         return {
             "skill": skill_name,
             "case": case_id,
             "model": str(model),
+            "mode": mode,
             "skipped": True,
             "reason": f"No API key set for provider '{model.provider}'.",
         }
 
+    call_trace = []
     try:
-        response_text = call_model(model.provider, model.model, skill_text, prompt)
+        if mode == "grounded":
+            from tester.sandbox import MockFilesystem
+            from tester.adapters import call_model_with_tools
+            fs = MockFilesystem(case.get("fixtures", {}))
+            tools = [
+                {
+                    "name": "read_file",
+                    "description": "Read a file from the filesystem",
+                    "parameters": {
+                        "type": "object",
+                        "properties": {
+                            "path": {"type": "string"}
+                        },
+                        "required": ["path"]
+                    }
+                }
+            ]
+            def tool_executor(name: str, kwargs: dict) -> str:
+                if name == "read_file":
+                    return fs.read_file(kwargs.get("path", ""))
+                return "Unknown tool"
+
+            response_text, call_trace = call_model_with_tools(
+                model.provider, model.model, skill_text, prompt, tools, tool_executor
+            )
+        else:
+            response_text = call_model(model.provider, model.model, skill_text, prompt)
     except Exception as exc:  # noqa: BLE001 - surface any provider error into the report
         return {
             "skill": skill_name,
             "case": case_id,
             "model": str(model),
+            "mode": mode,
             "error": f"{type(exc).__name__}: {exc}",
         }
 
@@ -99,12 +129,23 @@ def run_case(
             judgment["checks"].append({"item": f"Must contain '{pat}'", "pass": False, "reason": "Pattern not found."})
             judgment["overall_pass"] = False
 
+    if mode == "grounded":
+        for expected_call in case.get("expected_tool_calls", []):
+            called = any(c.get("tool") == expected_call["name"] and c.get("kwargs", {}).get("path") == expected_call.get("path") for c in call_trace)
+            if called:
+                judgment["checks"].append({"item": f"Tool called: {expected_call['name']} on {expected_call.get('path')}", "pass": True, "reason": "Found in call trace."})
+            else:
+                judgment["checks"].append({"item": f"Tool called: {expected_call['name']} on {expected_call.get('path')}", "pass": False, "reason": "Not found in call trace."})
+                judgment["overall_pass"] = False
+
     return {
         "skill": skill_name,
         "case": case_id,
         "model": str(model),
+        "mode": mode,
         "prompt": prompt,
         "response": response_text,
+        "call_trace": call_trace,
         "judgment": judgment,
     }
 
@@ -183,7 +224,10 @@ def write_summary(results: list[dict], run_id: str) -> None:
             if line.startswith("| ") and not line.startswith("| Skill"):
                 parts = [p.strip() for p in line.split("|")]
                 if len(parts) >= 5:
-                    _, skill, case, model, status, *_ = parts
+                    if len(parts) >= 8:
+                        _, skill, case, mode, model, status, *_ = parts
+                    else:
+                        _, skill, case, model, status, *_ = parts
                     if "pass" in status:
                         prev_status[(skill, case, model)] = "pass"
                     elif "fail" in status:
@@ -196,11 +240,12 @@ def write_summary(results: list[dict], run_id: str) -> None:
     table = Table(title=f"Run {run_id}")
     table.add_column("Skill")
     table.add_column("Case")
+    table.add_column("Mode")
     table.add_column("Model")
     table.add_column("Result")
     table.add_column("Delta")
 
-    summary_lines = [f"# Eval run {run_id}\n", "| Skill | Case | Model | Result | Delta |", "|---|---|---|---|---|"]
+    summary_lines = [f"# Eval run {run_id}\n", "| Skill | Case | Mode | Model | Result | Delta |", "|---|---|---|---|---|---|"]
 
     for r in results:
         if r.get("skipped"):
@@ -229,8 +274,9 @@ def write_summary(results: list[dict], run_id: str) -> None:
             else:
                 delta = "🔄 changed"
 
-        table.add_row(r["skill"], r["case"], r["model"], status, delta)
-        summary_lines.append(f"| {r['skill']} | {r['case']} | {r['model']} | {status} | {delta} |")
+        mode = r.get("mode", "text-only")
+        table.add_row(r["skill"], r["case"], mode, r["model"], status, delta)
+        summary_lines.append(f"| {r['skill']} | {r['case']} | {mode} | {r['model']} | {status} | {delta} |")
 
     console.print(table)
     summary_path.write_text("\n".join(summary_lines) + "\n")
@@ -264,11 +310,14 @@ def update_readme_leaderboard(results: list[dict]) -> None:
         for line in lines[2:]:
             if line.startswith("|") and not line.startswith("| Skill"):
                 parts = [p.strip() for p in line.split("|")]
-                if len(parts) >= 5:
-                    _, skill, case, model, status, *_ = parts
+                if len(parts) >= 7:
+                    _, skill, case, mode, model, status, *_ = parts
                     rows[(skill, case, model)] = line
+                elif len(parts) >= 6:
+                    _, skill, case, model, status, *_ = parts
+                    rows[(skill, case, model)] = f"| {skill} | {case} | text-only | {model} | {status} |"
     else:
-        header = ["| Skill | Case | Model | Result |", "|---|---|---|---|"]
+        header = ["| Skill | Case | Mode | Model | Result |", "|---|---|---|---|---|"]
         
     # Upsert new results
     for r in results:
@@ -283,7 +332,8 @@ def update_readme_leaderboard(results: list[dict]) -> None:
             passed = r["judgment"].get("overall_pass")
             status = "✅ pass" if passed else "❌ fail"
             
-        rows[(skill, case, model)] = f"| {skill} | {case} | {model} | {status} |"
+        mode = r.get("mode", "text-only")
+        rows[(skill, case, model)] = f"| {skill} | {case} | {mode} | {model} | {status} |"
         
     # Rebuild table, sorted by skill, case, model
     new_table_lines = header[:]
