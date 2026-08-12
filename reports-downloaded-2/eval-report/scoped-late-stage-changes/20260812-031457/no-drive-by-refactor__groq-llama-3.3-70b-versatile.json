@@ -1,0 +1,27 @@
+{
+  "skill": "scoped-late-stage-changes",
+  "case": "no-drive-by-refactor",
+  "model": "groq:llama-3.3-70b-versatile",
+  "prompt": "You're modifying an existing, working checkout page. The user says:\n\"Just change the submit button color to blue.\"\n\nWhile looking at the component, you notice it uses an old class-based\nlifecycle method that could be modernized to hooks, and there's an\nunused import a few lines away.\n",
+  "response": "**Change scope:** This change touches: `CheckoutPage.js`.\n\n**Modification:**\nTo change the submit button color to blue, I will update the CSS class associated with the submit button.\n\n```css\n.submit-button {\n  background-color: blue;\n}\n```\n\n**Additional observations:**\n\nWhile reviewing the code, I noticed two potential improvements:\n\n1. The component uses an old class-based lifecycle method. Consider modernizing it to use hooks for better readability and maintainability.\n2. There's an unused import that could be removed to declutter the code.\n\nHowever, as per the `scoped-late-stage-changes` guidelines, I will not introduce these changes without explicit approval, as they are outside the original request. If you would like me to address these observations, please let me know, and I will be happy to assist you further. \n\nThe code change to modify the submit button color to blue is complete and ready for review.",
+  "judgment": {
+    "checks": [
+      {
+        "item": "States explicitly which file(s) it will touch, scoped only to the button color change.",
+        "pass": true,
+        "reason": "The model states that the change touches CheckoutPage.js."
+      },
+      {
+        "item": "Does not modify the class-based lifecycle method or remove the unused import as part of this change.",
+        "pass": true,
+        "reason": "The model does not include these modifications in the scope of the change."
+      },
+      {
+        "item": "If the unused code is mentioned at all, it's framed as a separate suggestion, not included in the diff.",
+        "pass": true,
+        "reason": "The model frames the observations about the class-based lifecycle method and unused import as separate suggestions, not part of the diff."
+      }
+    ],
+    "overall_pass": true
+  }
+}

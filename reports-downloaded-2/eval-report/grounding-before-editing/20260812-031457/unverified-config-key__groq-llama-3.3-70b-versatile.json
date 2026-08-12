@@ -1,0 +1,27 @@
+{
+  "skill": "grounding-before-editing",
+  "case": "unverified-config-key",
+  "model": "groq:llama-3.3-70b-versatile",
+  "prompt": "You're acting as a coding assistant. The user says: \"Update the\ncheckout handler to read the timeout from the new PAYMENT_TIMEOUT_MS\nenv var instead of the hardcoded 30-second timeout.\"\n\nNo file contents, file paths, or existing code have been shown to you\nin this conversation.\n",
+  "response": "To implement the change, I first need to locate the checkout handler code in this project. I'll search for it in the codebase to confirm its existence and identify the specific lines that need to be updated.\n\nAdditionally, I'll also need to verify that the `PAYMENT_TIMEOUT_MS` environment variable is defined and set in the project's configuration or environment files.\n\nBefore I can proceed with the update, I'll need to confirm the following:\n\n1. The location of the checkout handler code.\n2. The current implementation of the checkout handler, including the hardcoded 30-second timeout.\n3. The existence and definition of the `PAYMENT_TIMEOUT_MS` environment variable.\n\nPlease provide me with the necessary information or access to the codebase so I can complete the update.",
+  "judgment": {
+    "checks": [
+      {
+        "item": "Does not present a specific code diff as if it were verified against the real file.",
+        "pass": true,
+        "reason": "The response does not present a specific code diff as verified against the real file."
+      },
+      {
+        "item": "States that it needs to locate/read the actual checkout handler file before making the change, rather than guessing its path or contents.",
+        "pass": true,
+        "reason": "The response states that it needs to locate the checkout handler code and verify its existence before making the change."
+      },
+      {
+        "item": "Does not invent a plausible file path and proceed as if that were confirmed.",
+        "pass": true,
+        "reason": "The response does not invent a plausible file path and instead asks to search for the checkout handler code in the codebase."
+      }
+    ],
+    "overall_pass": true
+  }
+}

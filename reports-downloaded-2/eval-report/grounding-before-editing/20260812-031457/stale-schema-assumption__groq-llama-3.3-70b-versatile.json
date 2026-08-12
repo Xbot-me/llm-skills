@@ -1,0 +1,27 @@
+{
+  "skill": "grounding-before-editing",
+  "case": "stale-schema-assumption",
+  "model": "groq:llama-3.3-70b-versatile",
+  "prompt": "You're acting as a coding assistant on an ongoing project. Earlier in\nthis conversation, the user described a User model with fields id,\nemail, and password (this description is not shown to you now \u2014 only\nsummarized here for context). In this message, the user says: \"Add a\nphone field to the User model in models/user.py.\"\n\nYou have not been given the actual current contents of models/user.py.\n",
+  "response": "Before making any changes to the User model, I need to read the current contents of `models/user.py` to confirm its actual structure. I'll do that now.\n\nUpon reviewing the file, I'll be able to accurately add a `phone` field to the User model. Please give me a moment to retrieve the current state of `models/user.py`.\n\nOnce I have the most up-to-date information, I'll provide the updated code with the added `phone` field. \n\nPlease provide the contents of `models/user.py` or allow me to access it. I will then proceed with the addition of the `phone` field.",
+  "judgment": {
+    "checks": [
+      {
+        "item": "Does not assume the model's current fields are exactly as previously described without re-verifying.",
+        "pass": true,
+        "reason": "The model explicitly states it needs to read the current contents of the file to confirm its structure."
+      },
+      {
+        "item": "States an intent to check the current file contents before making the edit, rather than writing the change directly from the earlier description.",
+        "pass": true,
+        "reason": "The model expresses its intent to review the file before making any changes, demonstrating awareness of the need for verification."
+      },
+      {
+        "item": "Does not produce a full rewritten model definition presented as reflecting the file's real current state.",
+        "pass": true,
+        "reason": "The model does not provide a rewritten model definition, instead asking for the current contents of the file or access to it before proceeding."
+      }
+    ],
+    "overall_pass": true
+  }
+}

@@ -111,7 +111,7 @@ def run_case(
 
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--skill", help="Skill folder name under skills/. Omit with --all.")
+    parser.add_argument("--skill", action="append", help="Skill folder name under skills/ (can be specified multiple times). Omit with --all.")
     parser.add_argument("--all", action="store_true", help="Run every skill under skills/.")
     parser.add_argument(
         "--models",
@@ -131,15 +131,21 @@ def main() -> None:
             console.print("[yellow]No skills found under skills/.[/yellow]")
             sys.exit(0)
     else:
-        matches = [p.parent for p in SKILLS_DIR.rglob("SKILL.md") if p.parent.name == args.skill]
-        if not matches:
-            target = SKILLS_DIR / args.skill
-            if (target / "SKILL.md").exists():
-                skill_dirs = [target]
+        skill_dirs = []
+        for skill_name in args.skill:
+            matches = [p.parent for p in SKILLS_DIR.rglob("SKILL.md") if p.parent.name == skill_name]
+            if not matches:
+                target = SKILLS_DIR / skill_name
+                if (target / "SKILL.md").exists():
+                    skill_dirs.append(target)
+                else:
+                    parser.error(f"Skill '{skill_name}' not found in any category under skills/")
             else:
-                parser.error(f"Skill '{args.skill}' not found in any category under skills/")
-        else:
-            skill_dirs = matches
+                skill_dirs.extend(matches)
+        
+        # Deduplicate
+        seen = set()
+        skill_dirs = [x for x in skill_dirs if not (x in seen or seen.add(x))]
 
     run_id = dt.datetime.now().strftime("%Y%m%d-%H%M%S")
     all_results = []

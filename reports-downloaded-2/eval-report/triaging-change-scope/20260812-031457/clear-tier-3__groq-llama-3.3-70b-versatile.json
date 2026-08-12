@@ -1,0 +1,27 @@
+{
+  "skill": "triaging-change-scope",
+  "case": "clear-tier-3",
+  "model": "groq:llama-3.3-70b-versatile",
+  "prompt": "The user says: \"We need role-based permissions across the API so\nadmins and regular users get different data back \u2014 this touches the\ndatabase schema, several API routes, and needs to show up correctly\nin the UI.\"\n",
+  "response": "**Classification:** Tier 3 \u2014 Cross-cutting or high-risk change\n\n**Reasoning:**\n\n* The request touches multiple layers: database schema, API routes, and UI.\n* It involves changing the data layer, which can have significant implications on the overall system.\n* The change affects authentication and permissions, which is a critical aspect of the system.\n* The request requires coordination across multiple components to ensure consistency and correctness.\n\n**Action:** Dispatch to `orchestrating-verified-changes` to handle the request. This will ensure that the necessary subagents are involved to verify and validate the changes across the different layers and components.\n\n**Rationale:** Given the complexity and scope of the request, it's essential to involve multiple subagents to ensure that the changes are thoroughly reviewed and verified. This will help prevent potential issues, such as data inconsistencies or security vulnerabilities, and ensure that the system remains stable and functional.",
+  "judgment": {
+    "checks": [
+      {
+        "item": "Recognizes this as cross-cutting, spanning data, API, and UI layers.",
+        "pass": true,
+        "reason": "The response explicitly classifies the request as Tier 3, stating it touches multiple layers including database schema, API routes, and UI."
+      },
+      {
+        "item": "Does not treat this as a simple single-file fix.",
+        "pass": true,
+        "reason": "The response clearly indicates that the request involves multiple layers and components, and does not suggest treating it as a single-file fix."
+      },
+      {
+        "item": "States that it will scope which layers are affected (or dispatch to the orchestrator) before making any edits, rather than diving straight into code.",
+        "pass": true,
+        "reason": "The response states that it will dispatch to the orchestrator, which implies scoping the affected layers before making edits, as the orchestrator will handle the coordination across multiple components."
+      }
+    ],
+    "overall_pass": true
+  }
+}

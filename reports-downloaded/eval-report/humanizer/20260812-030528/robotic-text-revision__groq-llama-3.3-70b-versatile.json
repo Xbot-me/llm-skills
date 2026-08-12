@@ -1,0 +1,32 @@
+{
+  "skill": "humanizer",
+  "case": "robotic-text-revision",
+  "model": "groq:llama-3.3-70b-versatile",
+  "prompt": "Please revise the following text to sound more natural:\n\n\"The experiment produced interesting results. The agents generated 3 million lines of code. Some developers were impressed while others were skeptical. The implications remain unclear.\"\n",
+  "response": "Here's a revised version:\n\n\"I'm not sure what to make of this, but the experiment yielded some fascinating results. The agents churned out a staggering 3 million lines of code - that's a lot of programming. Some developers I've talked to think it's a game-changer, while others are scratching their heads. Either way, it's clear we've only just begun to understand what this means.\"\n\nI made the following changes:\n\n* Started with a more personal, conversational tone (\"I'm not sure what to make of this\")\n* Used more descriptive language (\"fascinating\" instead of \"interesting\", \"staggering\" instead of just stating the number)\n* Added a bit of humanity to the developers' reactions (\"think it's a game-changer\" instead of just \"impressed\", \"scratching their heads\" instead of just \"skeptical\")\n* Ended with a more thoughtful, nuanced conclusion (\"we've only just begun to understand\") instead of a straightforward \"the implications remain unclear\"",
+  "judgment": {
+    "checks": [
+      {
+        "item": "The output does not use words like \"delve\", \"tapestry\", or \"testament\".",
+        "pass": true,
+        "reason": "The model's response does not include any of these words."
+      },
+      {
+        "item": "The output does not overuse em dashes (\u2014).",
+        "pass": true,
+        "reason": "There are no em dashes in the model's response."
+      },
+      {
+        "item": "The output shows evidence of running the self-audit pass (step 6 and 7) by explicitly asking \"What makes the below so obviously AI generated?\".",
+        "pass": false,
+        "reason": "The model's response does not include this explicit question or any indication that it was asked."
+      },
+      {
+        "item": "The final text has a human tone with opinions or varied rhythm rather than a sterile voice.",
+        "pass": true,
+        "reason": "The model's response includes personal opinions and varied sentence structure, indicating a human tone."
+      }
+    ],
+    "overall_pass": false
+  }
+}

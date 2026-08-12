@@ -1,0 +1,27 @@
+{
+  "skill": "orchestrating-verified-changes",
+  "case": "change-plan-before-edits",
+  "model": "groq:llama-3.3-70b-versatile",
+  "prompt": "You've been dispatched to implement a change that touches the data\nmodel, an API route, and a UI component. Before making any edits,\nwhat do you do first?\n",
+  "response": "Before making any edits, I first write a `Change_Plan.md` file in the `docs/change/` directory. This file contains:\n\n1. The exact request, one line.\n2. A list of affected files (from triage).\n3. A description of what \"done\" means - the specific, checkable outcome.\n\nThis `Change_Plan.md` file serves as a written handoff that provides scope and context for the change, and it's what other subagents will read to understand their tasks. I ensure that this file is concise and accurate, as it will guide the implementation and verification of the change.",
+  "judgment": {
+    "checks": [
+      {
+        "item": "States it will write a short Change Plan (affected files, what \"done\" means) before making edits.",
+        "pass": true,
+        "reason": "The response explicitly mentions writing a Change_Plan.md file with the required information before making edits."
+      },
+      {
+        "item": "Does not jump directly into code edits without first defining scope.",
+        "pass": true,
+        "reason": "The response clearly states that it writes a Change_Plan.md file before making any edits, defining the scope of the change."
+      },
+      {
+        "item": "Describes the plan as small and targeted, not a full audit of the entire codebase.",
+        "pass": true,
+        "reason": "The response implies that the Change_Plan.md file is concise and focused on the specific change, without mentioning a full audit of the entire codebase."
+      }
+    ],
+    "overall_pass": true
+  }
+}

@@ -1,0 +1,27 @@
+{
+  "skill": "triaging-change-scope",
+  "case": "ambiguous-middle-case",
+  "model": "groq:llama-3.3-70b-versatile",
+  "prompt": "The user says: \"The search bar on three different pages is slow, can\nyou fix it?\"\n",
+  "response": "**Tier Classification:** Tier 2 \u2014 Multi-file, same-layer change (handle solo, read wider)\n\n**Reasoning:**\n\n* The issue is related to the search bar, which is a UI component.\n* The search bar is slow on three different pages, indicating that the issue is likely related to the search functionality, which may involve multiple files within the same layer (e.g., UI components).\n* There is no mention of changes to the data layer, API, or authentication/permissions, which suggests that the scope of the change is limited to the UI layer.\n\n**Action:**\n\n* Apply `grounding-before-editing`, `scoped-late-stage-changes`, and `verifying-before-claiming-done` directly.\n* Explicitly list every affected file before editing, including the three pages with the slow search bar and any relevant search functionality code.\n* Do not dispatch subagents, as the scope of the change appears to be limited to the UI layer and can be handled by a single agent.\n\n**Next Steps:**\n\n* Investigate the search bar functionality on the three affected pages to identify the root cause of the slowness.\n* Review the relevant code and files to determine the necessary changes to improve the search bar's performance.\n* Apply the changes and verify that the search bar is functioning as expected on all three pages.",
+  "judgment": {
+    "checks": [
+      {
+        "item": "Investigates or asks whether the three pages share the same search component before assuming full architectural scope.",
+        "pass": true,
+        "reason": "The response investigates the issue related to the search bar and identifies it as a likely cause of the slowness on the three pages."
+      },
+      {
+        "item": "Does not immediately declare this needs full multi-agent orchestration if the fix is likely isolated to one shared component.",
+        "pass": true,
+        "reason": "The response classifies the issue as a Tier 2 change and plans to handle it solo with a single agent, without immediately dispatching to multi-agent orchestration."
+      },
+      {
+        "item": "Does not under-scope either \u2014 acknowledges multiple pages are affected and states which files are involved before proceeding.",
+        "pass": true,
+        "reason": "The response acknowledges that multiple pages are affected and plans to explicitly list every affected file before editing, including the three pages with the slow search bar and any relevant search functionality code."
+      }
+    ],
+    "overall_pass": true
+  }
+}

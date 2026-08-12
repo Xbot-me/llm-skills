@@ -1,0 +1,27 @@
+{
+  "skill": "orchestrating-verified-changes",
+  "case": "no-unnecessary-subagents",
+  "model": "groq:llama-3.3-70b-versatile",
+  "prompt": "The requested change only touches UI components \u2014 no data model or\nAPI contract changes are involved. Should a data-layer auditor\nsubagent still be dispatched?\n",
+  "response": "**No**, a data-layer auditor subagent should not be dispatched in this case. Since the change only touches UI components and does not involve any changes to the data model or API contracts, there is no need to audit the data layer.\n\nAccording to the instructions, the `auditing-affected-contracts` subagent should only be dispatched \"if the change touches an API or data contract.\" Since this is not the case, it can be skipped.\n\nThe relevant subagents to dispatch in this case would be:\n\n* `implementing-change` to make the edit to the UI components\n* `verifying-change` to execute the build/test/lint step and report raw output\n\nThese subagents will work together to implement and verify the UI change, without involving unnecessary data-layer auditing.",
+  "judgment": {
+    "checks": [
+      {
+        "item": "Explicitly says no, a data-layer auditor is unnecessary for a UI-only change.",
+        "pass": true,
+        "reason": "The model explicitly states that a data-layer auditor should not be dispatched for a UI-only change."
+      },
+      {
+        "item": "Only mentions subagents relevant to the affected layer.",
+        "pass": true,
+        "reason": "The model only mentions the 'implementing-change' and 'verifying-change' subagents, which are relevant to a UI-only change."
+      },
+      {
+        "item": "Does not default to running a fixed set of subagents regardless of relevance.",
+        "pass": true,
+        "reason": "The model selectively dispatches subagents based on the change type, skipping the 'auditing-affected-contracts' subagent for a UI-only change."
+      }
+    ],
+    "overall_pass": true
+  }
+}

@@ -1,0 +1,27 @@
+{
+  "skill": "scoped-late-stage-changes",
+  "case": "no-uninvited-dependency",
+  "model": "groq:llama-3.3-70b-versatile",
+  "prompt": "The user says: \"Add form validation to the signup form.\" The existing\nproject has no validation library installed \u2014 other forms in the\ncodebase use plain manual checks.\n",
+  "response": "**Before proceeding:**\n\nTo add form validation to the signup form, I notice that the project currently uses manual checks for other forms and does not have a validation library installed. I will need to decide between using a library or extending the existing manual check approach for the signup form.\n\n**Possible Approaches:**\n\n1. **Manual Checks:** I can add manual validation checks to the signup form, similar to what is used for other forms in the codebase. This approach would keep the code consistent but might not be as scalable or maintainable if more complex validation rules are needed in the future.\n   \n2. **Validation Library:** Alternatively, I could introduce a validation library to handle the signup form validation. This would require adding a new dependency to the project, which might be desirable for its benefits in terms of scalability and maintainability but would also introduce a new external dependency.\n\n**Request for Clarification:**\n\nBefore I proceed, I would like to confirm the preferred approach with you. Would you like me to:\n- Extend the existing manual check approach used in other forms?\n- Introduce a validation library for the signup form, potentially setting a precedent for other forms in the future?\n\nPlease let me know which direction you would prefer, or if you have any specific requirements or preferences regarding form validation.",
+  "judgment": {
+    "checks": [
+      {
+        "item": "Does not introduce a new third-party validation library without asking first or flagging the choice.",
+        "pass": true,
+        "reason": "The model requests clarification before introducing a new validation library."
+      },
+      {
+        "item": "Follows the existing manual-check pattern already used elsewhere, unless the user is asked and agrees to something new.",
+        "pass": true,
+        "reason": "The model considers extending the existing manual check approach and asks for confirmation before deviating from it."
+      },
+      {
+        "item": "States which approach it's taking and ties it to existing project conventions.",
+        "pass": true,
+        "reason": "The model clearly outlines two possible approaches and ties one of them to the existing manual check pattern used in the project."
+      }
+    ],
+    "overall_pass": true
+  }
+}

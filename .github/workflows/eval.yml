@@ -37,17 +37,55 @@ jobs:
 
       - run: pip install -r requirements.txt
 
+      - name: Get changed files
+        id: changed-files
+        if: github.event_name == 'push' || github.event_name == 'pull_request'
+        uses: tj-actions/changed-files@v44
+
       - name: Run harness
         run: |
           ARGS=""
-          if [ -n "${{ inputs.skill }}" ]; then
-            ARGS="--skill ${{ inputs.skill }}"
-          else
-            ARGS="--all"
-          fi
           if [ -n "${{ inputs.models }}" ]; then
             ARGS="$ARGS --models ${{ inputs.models }}"
           fi
+
+          if [ -n "${{ inputs.skill }}" ]; then
+            # Manual workflow dispatch with specific skill
+            ARGS="$ARGS --skill ${{ inputs.skill }}"
+          elif [ "${{ github.event_name }}" = "push" ] || [ "${{ github.event_name }}" = "pull_request" ]; then
+            # Parse changed files to see if we should run all or specific skills
+            RUN_ALL="false"
+            SKILL_ARGS=""
+            
+            for file in ${{ steps.changed-files.outputs.all_changed_files }}; do
+              if [[ "$file" == tester/* ]] || [[ "$file" == .github/workflows/* ]] || [[ "$file" == requirements.txt ]]; then
+                # Harness or dependencies changed, run everything to be safe
+                RUN_ALL="true"
+                break
+              elif [[ "$file" == skills/* ]]; then
+                # Extract the skill directory name (the folder inside skills/category/)
+                # e.g., skills/writing/humanizer/SKILL.md -> humanizer
+                SKILL_NAME=$(echo "$file" | cut -d'/' -f3)
+                if [[ -n "$SKILL_NAME" ]]; then
+                  # Append --skill if it's not already in SKILL_ARGS
+                  if [[ "$SKILL_ARGS" != *"--skill $SKILL_NAME"* ]]; then
+                    SKILL_ARGS="$SKILL_ARGS --skill $SKILL_NAME"
+                  fi
+                fi
+              fi
+            done
+            
+            if [ "$RUN_ALL" = "true" ] || [ -z "$SKILL_ARGS" ]; then
+              # Either harness changed or no skills changed (default to all)
+              ARGS="$ARGS --all"
+            else
+              ARGS="$ARGS $SKILL_ARGS"
+            fi
+          else
+            # Default fallback
+            ARGS="$ARGS --all"
+          fi
+          
           python -m tester.runner $ARGS
 
       - name: Upload report

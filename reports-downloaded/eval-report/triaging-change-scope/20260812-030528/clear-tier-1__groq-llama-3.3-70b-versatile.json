@@ -1,0 +1,27 @@
+{
+  "skill": "triaging-change-scope",
+  "case": "clear-tier-1",
+  "model": "groq:llama-3.3-70b-versatile",
+  "prompt": "The user says: \"Change the footer copyright year from 2025 to 2026 in\nFooter.jsx.\"\n",
+  "response": "**Tier 1 \u2014 Micro change**\n\nThis request involves a single file (Footer.jsx) and is a cosmetic edit (changing the copyright year). It does not affect any schema/API contract or involve multiple layers of the application.\n\n**Action**\n\nApply the following skills directly:\n\n1. **Grounding before editing**: Review the current state of the Footer.jsx file to ensure the copyright year is currently 2025.\n2. **Scoped late-stage changes**: Update the copyright year from 2025 to 2026 in the Footer.jsx file.\n3. **Verifying before claiming done**: Verify that the copyright year has been updated correctly and that the change does not introduce any errors or issues.\n\nNo subagents will be dispatched, and no audit/docs files will be opened unless directly relevant to the Footer.jsx file.",
+  "judgment": {
+    "checks": [
+      {
+        "item": "Classifies this as a micro (Tier 1) change requiring no subagent dispatch.",
+        "pass": true,
+        "reason": "The response explicitly classifies the request as a Tier 1 micro change and states that no subagents will be dispatched."
+      },
+      {
+        "item": "Does not propose an audit phase, orchestrator, or multiple specialized agents for this request.",
+        "pass": true,
+        "reason": "The response does not mention an audit phase, orchestrator, or multiple specialized agents, instead applying the required skills directly."
+      },
+      {
+        "item": "Applies a direct, scoped fix without unnecessary process overhead.",
+        "pass": true,
+        "reason": "The response applies a direct and scoped fix by updating the copyright year in the Footer.jsx file without introducing unnecessary process overhead."
+      }
+    ],
+    "overall_pass": true
+  }
+}

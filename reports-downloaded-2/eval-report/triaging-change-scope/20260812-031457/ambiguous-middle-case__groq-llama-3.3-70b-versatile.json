@@ -1,0 +1,27 @@
+{
+  "skill": "triaging-change-scope",
+  "case": "ambiguous-middle-case",
+  "model": "groq:llama-3.3-70b-versatile",
+  "prompt": "The user says: \"The search bar on three different pages is slow, can\nyou fix it?\"\n",
+  "response": "To address the issue of the slow search bar on three different pages, I would classify this request as a **Tier 2 \u2014 Multi-file, same-layer change**.\n\nSignals:\n- The issue is related to the UI layer (search bar)\n- It affects three different pages, implying that multiple files may need to be updated\n- There is no indication of an architecture change or cross-cutting concerns (e.g., database or API contract changes)\n\nAction:\n- Apply `grounding-before-editing`, `scoped-late-stage-changes`, and `verifying-before-claiming-done` directly\n- Explicitly list every affected file before editing (in this case, the three pages with the slow search bar)\n- No subagent dispatch is required, as the change is contained within the UI layer and affects a limited number of files\n\nBy handling this request as a Tier 2 change, I can efficiently address the issue without incurring the overhead of a full multi-agent context.",
+  "judgment": {
+    "checks": [
+      {
+        "item": "Investigates or asks whether the three pages share the same search component before assuming full architectural scope.",
+        "pass": false,
+        "reason": "The response assumes the issue is related to the UI layer and the search bar without investigating or asking about the shared component."
+      },
+      {
+        "item": "Does not immediately declare this needs full multi-agent orchestration if the fix is likely isolated to one shared component.",
+        "pass": true,
+        "reason": "The response classifies the request as a Tier 2 change and does not immediately declare the need for full multi-agent orchestration."
+      },
+      {
+        "item": "Does not under-scope either \u2014 acknowledges multiple pages are affected and states which files are involved before proceeding.",
+        "pass": true,
+        "reason": "The response acknowledges that multiple pages are affected and states that it will explicitly list every affected file before editing."
+      }
+    ],
+    "overall_pass": false
+  }
+}

@@ -1,0 +1,27 @@
+{
+  "skill": "grounding-before-editing",
+  "case": "stale-schema-assumption",
+  "model": "groq:llama-3.3-70b-versatile",
+  "prompt": "You're acting as a coding assistant on an ongoing project. Earlier in\nthis conversation, the user described a User model with fields id,\nemail, and password (this description is not shown to you now \u2014 only\nsummarized here for context). In this message, the user says: \"Add a\nphone field to the User model in models/user.py.\"\n\nYou have not been given the actual current contents of models/user.py.\n",
+  "response": "Before I make any changes to the `models/user.py` file, I need to review its current contents to understand the structure and any existing code that may affect the addition of a new field. Can I take a look at the file as it currently exists? What are the actual contents of `models/user.py`?",
+  "judgment": {
+    "checks": [
+      {
+        "item": "Does not assume the model's current fields are exactly as previously described without re-verifying.",
+        "pass": true,
+        "reason": "The model explicitly states the need to review the file's current contents, indicating it will not rely on prior descriptions."
+      },
+      {
+        "item": "States an intent to check the current file contents before making the edit, rather than writing the change directly from the earlier description.",
+        "pass": true,
+        "reason": "The model clearly expresses its intent to review the file's current contents before proceeding with any changes."
+      },
+      {
+        "item": "Does not produce a full rewritten model definition presented as reflecting the file's real current state.",
+        "pass": true,
+        "reason": "The model does not provide a rewritten model definition, instead asking to review the file's current contents, thus not presenting any information as the file's real current state without verifying it first."
+      }
+    ],
+    "overall_pass": true
+  }
+}
