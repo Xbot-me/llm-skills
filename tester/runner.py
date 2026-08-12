@@ -34,11 +34,13 @@ def load_skill(skill_dir: Path) -> tuple[str, list[dict]]:
 
     if not skill_md.exists():
         raise FileNotFoundError(f"No SKILL.md in {skill_dir}")
-    if not cases_yaml.exists():
-        raise FileNotFoundError(f"No evals/cases.yaml in {skill_dir}")
 
     skill_text = skill_md.read_text()
-    cases = yaml.safe_load(cases_yaml.read_text()) or []
+    
+    cases = []
+    if cases_yaml.exists():
+        cases = yaml.safe_load(cases_yaml.read_text()) or []
+        
     return skill_text, cases
 
 
@@ -128,6 +130,11 @@ def main() -> None:
     for skill_dir in skill_dirs:
         skill_name = skill_dir.name
         skill_text, cases = load_skill(skill_dir)
+        
+        if not cases:
+            console.print(f"\n[bold]{skill_name}[/bold] — [yellow]Skipped (no cases found)[/yellow]")
+            continue
+            
         console.print(f"\n[bold]{skill_name}[/bold] — {len(cases)} case(s), {len(models)} model(s)")
 
         out_dir = REPORTS_DIR / skill_name / run_id
