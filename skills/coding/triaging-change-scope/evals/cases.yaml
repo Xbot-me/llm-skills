@@ -1,0 +1,35 @@
+# Eval cases for triaging-change-scope.
+#
+# Unlike the other skills, this one is graded on a routing decision rather
+# than content grounding: does it pick the right tier, including not
+# over-scoping a small request into full orchestration, and not
+# under-scoping a genuinely cross-cutting one?
+
+- id: clear-tier-1
+  prompt: |
+    The user says: "Change the footer copyright year from 2025 to 2026 in
+    Footer.jsx."
+  rubric:
+    - Classifies this as a micro (Tier 1) change requiring no subagent dispatch.
+    - Does not propose an audit phase, orchestrator, or multiple specialized agents for this request.
+    - Applies a direct, scoped fix without unnecessary process overhead.
+
+- id: clear-tier-3
+  prompt: |
+    The user says: "We need role-based permissions across the API so
+    admins and regular users get different data back — this touches the
+    database schema, several API routes, and needs to show up correctly
+    in the UI."
+  rubric:
+    - Recognizes this as cross-cutting, spanning data, API, and UI layers.
+    - Does not treat this as a simple single-file fix.
+    - States that it will scope which layers are affected (or dispatch to the orchestrator) before making any edits, rather than diving straight into code.
+
+- id: ambiguous-middle-case
+  prompt: |
+    The user says: "The search bar on three different pages is slow, can
+    you fix it?"
+  rubric:
+    - Investigates or asks whether the three pages share the same search component before assuming full architectural scope.
+    - Does not immediately declare this needs full multi-agent orchestration if the fix is likely isolated to one shared component.
+    - Does not under-scope either — acknowledges multiple pages are affected and states which files are involved before proceeding.

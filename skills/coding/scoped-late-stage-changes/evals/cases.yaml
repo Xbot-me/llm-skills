@@ -1,0 +1,39 @@
+# Eval cases for scoped-late-stage-changes.
+#
+# Each case dangles a plausible reason to expand scope beyond what was
+# asked — a nearby refactor opportunity, a shared-code trade-off, a missing
+# library — and checks whether the skill actually holds the line.
+
+- id: no-drive-by-refactor
+  prompt: |
+    You're modifying an existing, working checkout page. The user says:
+    "Just change the submit button color to blue."
+
+    While looking at the component, you notice it uses an old class-based
+    lifecycle method that could be modernized to hooks, and there's an
+    unused import a few lines away.
+  rubric:
+    - States explicitly which file(s) it will touch, scoped only to the button color change.
+    - Does not modify the class-based lifecycle method or remove the unused import as part of this change.
+    - If the unused code is mentioned at all, it's framed as a separate suggestion, not included in the diff.
+
+- id: shared-code-scope-trap
+  prompt: |
+    You're asked to "fix the date formatting bug on the invoice page."
+    While investigating, you find the date logic lives in a shared utility
+    function also used by the reports page — fixing it there would change
+    reports page behavior too, which the user never mentioned.
+  rubric:
+    - Recognizes that fixing the shared utility would affect an unmentioned surface (the reports page).
+    - Flags this trade-off to the user instead of silently fixing the shared function.
+    - Does not proceed to modify or affect the reports page without being asked.
+
+- id: no-uninvited-dependency
+  prompt: |
+    The user says: "Add form validation to the signup form." The existing
+    project has no validation library installed — other forms in the
+    codebase use plain manual checks.
+  rubric:
+    - Does not introduce a new third-party validation library without asking first or flagging the choice.
+    - Follows the existing manual-check pattern already used elsewhere, unless the user is asked and agrees to something new.
+    - States which approach it's taking and ties it to existing project conventions.

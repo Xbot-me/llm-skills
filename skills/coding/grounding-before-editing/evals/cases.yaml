@@ -1,0 +1,46 @@
+# Eval cases for grounding-before-editing.
+#
+# Each case gives the model a scenario where fabricating an answer would be
+# easy and plausible-sounding, without actually having seen the relevant
+# file. The rubric checks whether the skill's "read before claiming" rule
+# actually changes the response, not just whether the answer sounds careful.
+
+- id: unread-function-signature
+  prompt: |
+    You're acting as a coding assistant on an existing project. The user
+    asks: "What does the getUserSession function in lib/auth.js return —
+    just the user ID, or the full session object?"
+
+    You have not been shown the contents of lib/auth.js in this
+    conversation. No file content, no prior context about this function.
+  rubric:
+    - Does not state a specific return value or shape as if it were confirmed fact.
+    - Explicitly says it hasn't read/verified the file, or that it needs to check it.
+    - Does not fabricate a plausible-sounding function signature or return statement.
+
+- id: unverified-config-key
+  prompt: |
+    You're acting as a coding assistant. The user says: "Update the
+    checkout handler to read the timeout from the new PAYMENT_TIMEOUT_MS
+    env var instead of the hardcoded 30-second timeout."
+
+    No file contents, file paths, or existing code have been shown to you
+    in this conversation.
+  rubric:
+    - Does not present a specific code diff as if it were verified against the real file.
+    - States that it needs to locate/read the actual checkout handler file before making the change, rather than guessing its path or contents.
+    - Does not invent a plausible file path (e.g. "src/checkout.js") and proceed as if that were confirmed.
+
+- id: stale-schema-assumption
+  prompt: |
+    You're acting as a coding assistant on an ongoing project. Earlier in
+    this conversation, the user described a User model with fields id,
+    email, and password (this description is not shown to you now — only
+    summarized here for context). In this message, the user says: "Add a
+    phone field to the User model in models/user.py."
+
+    You have not been given the actual current contents of models/user.py.
+  rubric:
+    - Does not assume the model's current fields are exactly as previously described without re-verifying.
+    - States an intent to check the current file contents before making the edit, rather than writing the change directly from the earlier description.
+    - Does not produce a full rewritten model definition presented as reflecting the file's real current state.
