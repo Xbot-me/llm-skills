@@ -36,11 +36,27 @@ overall_pass is true only if every check passes.
 """
 
 
-def _extract_json(text: str) -> dict:
-    text = text.strip()
-    text = re.sub(r"^```(json)?", "", text).strip()
-    text = re.sub(r"```$", "", text).strip()
-    return json.loads(text)
+def parse_judge_output(raw_text: str) -> dict:
+    """Parse judge model output as JSON, tolerating common formatting slips."""
+    candidates = [raw_text.strip()]
+
+    # Strip markdown code fences if present
+    fenced = re.search(r"```(?:json)?\s*(.*?)```", raw_text, re.DOTALL)
+    if fenced:
+        candidates.append(fenced.group(1).strip())
+
+    # Try trimming trailing junk after the last balanced '}'
+    last_brace = raw_text.rfind("}")
+    if last_brace != -1:
+        candidates.append(raw_text[: last_brace + 1].strip())
+
+    for candidate in candidates:
+        try:
+            return json.loads(candidate)
+        except json.JSONDecodeError:
+            continue
+
+    raise ValueError(f"Could not parse judge output as JSON:\n{raw_text}")
 
 
 def judge_response(
@@ -62,13 +78,23 @@ def judge_response(
 
 {response_text}
 """
-    raw = call_model(judge.provider, judge.model, JUDGE_SYSTEM_PROMPT, user_prompt)
-    try:
-        return _extract_json(raw)
-    except (json.JSONDecodeError, ValueError):
-        return {
-            "checks": [],
-            "overall_pass": False,
-            "judge_error": "Could not parse judge output as JSON.",
-            "raw_judge_output": raw,
-        }
+    
+    max_retries = 1
+    last_error = None
+    
+    for attempt in range(max_retries + 1):
+        raw = call_model(judge.provider, judge.model, JUDGE_SYSTEM_PROMPT, user_prompt)
+        try:
+            return parse_judge_output(raw)
+        except ValueError as e:
+            last_error = e
+            if attempt < max_retries:
+                continue
+
+    return {
+        "checks": [],
+        "overall_pass": False,
+        "judge_error": str(last_error),
+        "raw_judge_output": raw,
+    }
+
