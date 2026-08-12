@@ -234,7 +234,67 @@ def write_summary(results: list[dict], run_id: str) -> None:
 
     console.print(table)
     summary_path.write_text("\n".join(summary_lines) + "\n")
+    update_readme_leaderboard(results)
     console.print(f"\nFull transcripts in [cyan]reports/*/{run_id}/[/cyan], summary in [cyan]{summary_path}[/cyan]")
+
+
+def update_readme_leaderboard(results: list[dict]) -> None:
+    readme_path = Path("README.md")
+    if not readme_path.exists():
+        return
+    
+    content = readme_path.read_text()
+    start_marker = "<!-- LEADERBOARD_START -->"
+    end_marker = "<!-- LEADERBOARD_END -->"
+    
+    if start_marker not in content or end_marker not in content:
+        return
+        
+    start_idx = content.find(start_marker) + len(start_marker)
+    end_idx = content.find(end_marker)
+    
+    table_content = content[start_idx:end_idx].strip()
+    lines = table_content.splitlines()
+    
+    # Parse existing rows
+    rows = {}
+    header = []
+    if len(lines) >= 2:
+        header = lines[:2]
+        for line in lines[2:]:
+            if line.startswith("|") and not line.startswith("| Skill"):
+                parts = [p.strip() for p in line.split("|")]
+                if len(parts) >= 5:
+                    _, skill, case, model, status, *_ = parts
+                    rows[(skill, case, model)] = line
+    else:
+        header = ["| Skill | Case | Model | Result |", "|---|---|---|---|"]
+        
+    # Upsert new results
+    for r in results:
+        skill = r["skill"]
+        case = r["case"]
+        model = r["model"]
+        if r.get("skipped"):
+            status = f"skipped"
+        elif r.get("error"):
+            status = f"error"
+        else:
+            passed = r["judgment"].get("overall_pass")
+            status = "✅ pass" if passed else "❌ fail"
+            
+        rows[(skill, case, model)] = f"| {skill} | {case} | {model} | {status} |"
+        
+    # Rebuild table, sorted by skill, case, model
+    new_table_lines = header[:]
+    for key in sorted(rows.keys()):
+        new_table_lines.append(rows[key])
+        
+    new_table_content = "\n" + "\n".join(new_table_lines) + "\n"
+    
+    new_content = content[:start_idx] + new_table_content + content[end_idx:]
+    readme_path.write_text(new_content)
+
 
 
 if __name__ == "__main__":

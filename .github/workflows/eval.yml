@@ -21,6 +21,8 @@ on:
 jobs:
   eval:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     env:
       ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
       GOOGLE_API_KEY: ${{ secrets.GOOGLE_API_KEY }}
@@ -93,3 +95,14 @@ jobs:
         with:
           name: eval-report
           path: reports/
+
+      - name: Commit updated Leaderboard
+        if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
+        run: |
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+          if [[ -n $(git status -s README.md) ]]; then
+            git add README.md
+            git commit -m "chore: update leaderboard [skip ci]"
+            git push
+          fi

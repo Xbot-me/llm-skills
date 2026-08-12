@@ -16,6 +16,13 @@ follow the rule on Claude and ignore it on Gemini, or follow it for the
 example in the description and not for a slightly different phrasing. This
 repo exists to catch that before the skill goes into a real project.
 
+## Leaderboard
+
+<!-- LEADERBOARD_START -->
+| Skill | Case | Model | Result |
+|---|---|---|---|
+<!-- LEADERBOARD_END -->
+
 ## Structure
 
 ```
