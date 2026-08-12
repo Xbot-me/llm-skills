@@ -21,6 +21,22 @@ repo exists to catch that before the skill goes into a real project.
 <!-- LEADERBOARD_START -->
 | Skill | Case | Model | Result |
 |---|---|---|---|
+| grounding-before-editing | stale-schema-assumption | grounded | gemini:gemini-2.5-flash | error |
+| grounding-before-editing | unread-function-signature | grounded | gemini:gemini-2.5-flash | error |
+| grounding-before-editing | unverified-config-key | grounded | gemini:gemini-2.5-flash | error |
+| humanizer | robotic-text-revision | text-only | gemini:gemini-2.5-flash | error |
+| orchestrating-verified-changes | capped-reflexion-stop | text-only | gemini:gemini-2.5-flash | error |
+| orchestrating-verified-changes | change-plan-before-edits | text-only | gemini:gemini-2.5-flash | error |
+| orchestrating-verified-changes | no-unnecessary-subagents | text-only | gemini:gemini-2.5-flash | error |
+| scoped-late-stage-changes | no-drive-by-refactor | text-only | gemini:gemini-2.5-flash | error |
+| scoped-late-stage-changes | no-uninvited-dependency | text-only | gemini:gemini-2.5-flash | error |
+| scoped-late-stage-changes | shared-code-scope-trap | text-only | gemini:gemini-2.5-flash | error |
+| triaging-change-scope | ambiguous-middle-case | text-only | gemini:gemini-2.5-flash | error |
+| triaging-change-scope | clear-tier-1 | text-only | gemini:gemini-2.5-flash | error |
+| triaging-change-scope | clear-tier-3 | text-only | gemini:gemini-2.5-flash | error |
+| verifying-before-claiming-done | impatient-user-pressure | text-only | gemini:gemini-2.5-flash | error |
+| verifying-before-claiming-done | no-verification-available | text-only | gemini:gemini-2.5-flash | error |
+| verifying-before-claiming-done | partial-verification-honesty | text-only | gemini:gemini-2.5-flash | error |
 <!-- LEADERBOARD_END -->
 
 ## Structure
